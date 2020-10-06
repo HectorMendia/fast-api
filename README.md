@@ -300,3 +300,164 @@ Using the PUT verb:
 async def create_item(item_id: int, item: Item):
     return {"item_id": item_id, **item.dict()}
 ```
+
+### Response Types
+By default FastApi responses are in JSon format, but there are times we need to use a different response types, or well use a better performance response. That's why FastApi provides the following response types:
+
+- ORJSONResponse, UJSONResponse
+- HTMLResponse
+- PlainTestResponse
+- RedirectResponse
+- StreamingResponse
+
+#### Better JSon Performance
+Sometimes you need to squeeze a couple of milliseconds, you can use an alternative library for json format. FastApi then provide `ORJSONResponse` and `UJSONResponse`.
+
+**ORJSONResponse**
+
+```python
+from fastapi.responses import ORJSONResponse
+.
+.
+.
+@app.get("/items/all", response_class=ORJSONResponse)
+async def read_items():
+    return [{"item_id": "Foo"}]
+```
+
+**UJSONResponse**
+
+```python
+from fastapi.responses import UJSONResponse
+.
+.
+.
+@app.get("/items/all", response_class=UJSONResponse)
+async def read_items():
+    return [{"item_id": "Foo"}]
+```
+
+#### Html Response
+
+```python
+from fastapi.responses import HTMLResponse
+.
+.
+.
+@app.get("/html", response_class=HTMLResponse)
+async def read_items():
+    return """
+    <html>
+        <head>
+            <title>Some HTML in here</title>
+        </head>
+        <body>
+            <h1>Look ma! HTML!</h1>
+        </body>
+    </html>
+    """
+```
+
+#### Custom Response
+
+```python
+from fastapi import FastAPI, Response
+.
+.
+.
+@app.get("/legacy/")
+def get_legacy_data():
+    data = """<?xml version="1.0"?>
+    <shampoo>
+    <Header>
+        Apply shampoo here.
+    </Header>
+    <Body>
+        You'll have to use soap here.
+    </Body>
+    </shampoo>
+    """
+    return Response(content=data, media_type="application/xml")
+```
+
+#### Plain Text
+
+```python
+from fastapi.responses import PlainTextResponse
+.
+.
+.
+@app.get("/", response_class=PlainTextResponse)
+async def main():
+    return "Hello World"
+```
+
+#### Redirect Response
+
+```python
+from fastapi.responses import RedirectResponse
+.
+.
+.
+@app.get("/redirect")
+async def read_typer():
+    return RedirectResponse("https://youtube.com")
+```
+
+#### Video Response
+
+```python
+
+from fastapi.responses import StreamingResponse
+
+some_file_path = "ejemplo.mp4"
+
+
+@app.get("/video")
+def main():
+    file_like = open(some_file_path, mode="rb")
+    return StreamingResponse(file_like, media_type="video/mp4")
+```
+
+#### Download File
+
+```python
+from fastapi.responses import FileResponse
+
+some_file_path = "large-video-file.mp4"
+.
+.
+.
+@app.get("/download")
+async def main():
+    return FileResponse(some_file_path)
+```
+
+#### CSV Download
+
+```python
+from fastapi.responses StreamingResponse
+
+@app.get("/get_csv")
+async def get_csv():
+
+   df = pd.DataFrame({'col1': [1, 2], 'col2': [3, 4]})
+
+   stream = io.StringIO()
+
+   df.to_csv(stream, index = False)
+
+   response = StreamingResponse(iter([stream.getvalue()]),
+                        media_type="text/csv"
+   )
+
+   response.headers["Content-Disposition"] = "attachment; filename=export.csv"
+
+   return response
+```
+
+**Note:** previous to run the code above, install pandas. You can install it with the following command:
+
+```bash
+pip install pandas
+```
